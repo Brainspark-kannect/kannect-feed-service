@@ -1,5 +1,6 @@
 package com.kannect.feed.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -69,7 +70,7 @@ class ReelController implements IReelController {
     @PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
     public ResponseEntity<SuccessResponse> createReel(
             @RequestPart("reel") ReelRequest request,
-            @RequestPart("file") MultipartFile videoFile) {
+            @RequestPart("file") MultipartFile videoFile) throws IOException {
         ReelResponse created = reelService.createReel(request, videoFile);
         SuccessResponse resp = SuccessResponse.builder()
             .statusCode(201)

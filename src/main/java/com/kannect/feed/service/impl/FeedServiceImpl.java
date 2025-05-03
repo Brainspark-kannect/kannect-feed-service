@@ -1,10 +1,12 @@
 package com.kannect.feed.service.impl;
 
+import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +21,16 @@ import com.kannect.feed.entity.FeedMedia;
 import com.kannect.feed.repository.FeedLikeRepository;
 import com.kannect.feed.repository.FeedMediaRepository;
 import com.kannect.feed.repository.FeedRepository;
+import com.kannect.feed.utils.CloudinaryUploader;
 
 @Service
 public class FeedServiceImpl {
     @Autowired private FeedRepository feedRepo;
     @Autowired private FeedMediaRepository mediaRepo;
     @Autowired private FeedLikeRepository feedLikeRepo;
-    @Autowired private GcpStorageService gcpStorage; // a component for uploading to GCP
+    @Autowired private CloudinaryUploader cloudinaryUploader;
 
-    public FeedResponse createFeed(FeedRequest req, MultipartFile file) {
+    public FeedResponse createFeed(FeedRequest req, MultipartFile file) throws IOException {
         // 1. Save Feed entity
         Feed feed = new Feed();
         feed.setTitle(req.getTitle());
@@ -39,7 +42,8 @@ public class FeedServiceImpl {
         // 2. If file provided, upload to GCP and save FeedMedia
         if (file != null && !file.isEmpty()) {
             // Use Google Cloud Storage client to upload file
-            String url = gcpStorage.upload(file); // returns public URL or path
+        	String fileName = "feed-media/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
+            String url = cloudinaryUploader.uploadFile(file,fileName); // returns public URL or path
             FeedMedia media = new FeedMedia();
             media.setFeed(feed);
             media.setGcpUrl(url);

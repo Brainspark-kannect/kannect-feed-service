@@ -1,5 +1,6 @@
 package com.kannect.feed.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -70,7 +71,7 @@ public class FeedController implements IFeedController{
 	@PostMapping
 	@PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
 	public ResponseEntity<SuccessResponse> createFeed(@RequestPart("feed") FeedRequest request,
-			@RequestPart(value = "file", required = false) MultipartFile file){
+			@RequestPart(value = "file", required = false) MultipartFile file) throws IOException{
 		FeedResponse created = feedServiceImpl.createFeed(request, file);
 		SuccessResponse resp = SuccessResponse.builder().statusCode(201).status(HttpStatus.CREATED)
 				.message("Feed created successfully").data(created).build();

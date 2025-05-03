@@ -1,7 +1,9 @@
 package com.kannect.feed.service.impl;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,14 +16,15 @@ import com.kannect.feed.entity.ReelLike;
 import com.kannect.feed.exception.ResourceNotFoundException;
 import com.kannect.feed.repository.ReelLikeRepository;
 import com.kannect.feed.repository.ReelRepository;
+import com.kannect.feed.utils.CloudinaryUploader;
 
 @Service
 public class ReelServiceImpl {
     @Autowired private ReelRepository reelRepo;
     @Autowired private ReelLikeRepository reelLikeRepo;
-    @Autowired private GcpStorageService gcpStorage;
+    @Autowired private CloudinaryUploader cloudinaryUploader;
 
-    public ReelResponse createReel(ReelRequest req, MultipartFile videoFile) {
+    public ReelResponse createReel(ReelRequest req, MultipartFile videoFile) throws IOException {
         // Save Reel entity
         Reel reel = new Reel();
         reel.setCaption(req.getCaption());
@@ -30,7 +33,8 @@ public class ReelServiceImpl {
 
         // Upload video to GCP and set URL
         if (videoFile != null && !videoFile.isEmpty()) {
-            String url = gcpStorage.upload(videoFile);
+        	String fileName = "reel-media/" + UUID.randomUUID() + "-" + videoFile.getOriginalFilename();
+            String url = cloudinaryUploader.uploadFile(videoFile,fileName);
             reel.setVideoUrl(url);
             reel = reelRepo.save(reel);
         }
