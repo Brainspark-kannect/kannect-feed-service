@@ -11,9 +11,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @ComponentScan(basePackages = "com.kannect")
-@EnableJpaRepositories(basePackages = {"com.kannect.user.auth.repository","com.kannect.feed.repository"})
+@EntityScan(basePackages = { "com.kannect.user.auth.entity", "com.kannect.feed.entity" })
+@EnableJpaRepositories(basePackages = { "com.kannect.user.auth.repository", "com.kannect.feed.repository" })
 @EnableFeignClients(basePackages = "com.kannect.feed.service")
-@EntityScan(basePackages = {"com.kannect.user.auth.entity","com.kannect.achieve.entity"})
 public class KannectFeedServiceApplication {
 
 	public static void main(String[] args) {
