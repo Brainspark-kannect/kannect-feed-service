@@ -18,4 +18,6 @@ public class FeedResponse {
     private String mediaUrl;     // URL to the uploaded media (if any)
     private Instant createdAt;
     private Instant updatedAt;
+    private long likeCount;
+    private long dislikeCount;
 }

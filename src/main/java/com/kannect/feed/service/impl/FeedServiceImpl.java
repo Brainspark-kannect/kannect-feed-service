@@ -2,6 +2,7 @@ package com.kannect.feed.service.impl;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +38,8 @@ public class FeedServiceImpl {
         feed.setContent(req.getContent());
         feed.setType(req.getType());
         feed.setFunFriday(req.isFunFriday());
+        feed.setCreatedAt(Instant.now());
+        feed.setUpdatedAt(Instant.now());
         feed = feedRepo.save(feed);
 
         // 2. If file provided, upload to GCP and save FeedMedia
@@ -52,11 +55,22 @@ public class FeedServiceImpl {
         }
 
         // 3. Build and return response DTO
-        FeedResponse resp = new FeedResponse(feed.getId(), feed.getTitle(),
-            feed.getContent(), feed.getType(), feed.isFunFriday(),
-            (feed.getMedia()!=null ? feed.getMedia().getGcpUrl() : null),
-            feed.getCreatedAt(), feed.getUpdatedAt());
-        return resp;
+        long likes    = feedLikeRepo.countByFeedIdAndLikedTrue(feed.getId());
+        long dislikes = feedLikeRepo.countByFeedIdAndLikedFalse(feed.getId());
+
+        return new FeedResponse(
+            feed.getId(),
+            feed.getTitle(),
+            feed.getContent(),
+            feed.getType(),
+            feed.isFunFriday(),
+            feed.getMedia() != null ? feed.getMedia().getGcpUrl() : null,
+            feed.getCreatedAt(),
+            feed.getUpdatedAt(),
+            likes,               // new field
+            dislikes             // new field
+        );
+
     }
 
     public FeedResponse getFeedById(Long id) {
@@ -84,6 +98,7 @@ public class FeedServiceImpl {
         feed.setContent(req.getContent());
         feed.setType(req.getType());
         feed.setFunFriday(req.isFunFriday());
+        feed.setUpdatedAt(Instant.now());
         feed = feedRepo.save(feed);
         return toDto(feed);
     }
@@ -107,15 +122,32 @@ public class FeedServiceImpl {
             reaction.setFeed(feed);
             reaction.setUserId(userId);
             reaction.setLiked(liked);
+            reaction.setReactedAt(Instant.now());
             feedLikeRepo.save(reaction);
         }
     }
 
     private FeedResponse toDto(Feed feed) {
-        String mediaUrl = (feed.getMedia()!=null ? feed.getMedia().getGcpUrl() : null);
-        return new FeedResponse(feed.getId(), feed.getTitle(), feed.getContent(),
-            feed.getType(), feed.isFunFriday(), mediaUrl,
-            feed.getCreatedAt(), feed.getUpdatedAt());
+        String mediaUrl = (feed.getMedia() != null)
+            ? feed.getMedia().getGcpUrl()
+            : null;
+
+        // Fetch like/dislike counts
+        long likes    = feedLikeRepo.countByFeedIdAndLikedTrue(feed.getId());
+        long dislikes = feedLikeRepo.countByFeedIdAndLikedFalse(feed.getId());
+
+        return new FeedResponse(
+            feed.getId(),
+            feed.getTitle(),
+            feed.getContent(),
+            feed.getType(),
+            feed.isFunFriday(),
+            mediaUrl,
+            feed.getCreatedAt(),
+            feed.getUpdatedAt(),
+            likes,
+            dislikes
+        );
     }
 }
 
