@@ -1,5 +1,7 @@
 package com.kannect.feed.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -75,11 +77,12 @@ class PollController implements IPollController {
     @GetMapping
     @PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
     public ResponseEntity<SuccessResponse> getAllPolls() {
-        // Optional: implement listing if needed
+    	List<PollResponse> poll = pollService.getAllPollsWithResults();
         SuccessResponse resp = SuccessResponse.builder()
             .statusCode(200)
             .status(HttpStatus.OK)
             .message("All polls fetched successfully")
+            .data(poll)
             .build();
         return ResponseEntity.ok(resp);
     }

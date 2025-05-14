@@ -3,6 +3,7 @@ package com.kannect.feed.service.impl;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,6 +67,32 @@ public class PollServiceImpl {
             optionResponses.add(new PollOptionResponse(opt.getId(), opt.getText(), count));
         }
         return new PollResponse(poll.getId(), poll.getQuestion(), optionResponses);
+    }
+    
+    
+    public List<PollResponse> getAllPollsWithResults() {
+        // 1. Fetch all polls
+        List<Poll> polls = pollRepo.findAll();
+
+        // 2. Map each Poll to a PollResponse with counts
+        return polls.stream()
+            .map(poll -> {
+                List<PollOptionResponse> optionResponses = new ArrayList<>();
+                for (PollOption opt : poll.getOptions()) {
+                    long count = voteRepo.countByOption(opt);
+                    optionResponses.add(new PollOptionResponse(
+                        opt.getId(),
+                        opt.getText(),
+                        count
+                    ));
+                }
+                return new PollResponse(
+                    poll.getId(),
+                    poll.getQuestion(),
+                    optionResponses
+                );
+            })
+            .collect(Collectors.toList());
     }
 }
 
