@@ -3,6 +3,8 @@ package com.kannect.feed.controller;
 import java.io.IOException;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kannect.feed.dto.request.FeedRequest;
 import com.kannect.feed.dto.request.ReactionRequest;
 import com.kannect.feed.dto.response.FeedResponse;
@@ -36,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 public class FeedController implements IFeedController{
 
 	private final FeedServiceImpl feedServiceImpl;
+	public static final Logger LOGGER = LoggerFactory.getLogger(FeedController.class);
 
 	@Override
 	@GetMapping
@@ -70,8 +75,15 @@ public class FeedController implements IFeedController{
 	@Override
 	@PostMapping
 	@PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
-	public ResponseEntity<SuccessResponse> createFeed(@RequestPart("feed") FeedRequest request,
+	public ResponseEntity<SuccessResponse> createFeed(@RequestPart("feed") String requestStr,
 			@RequestPart(value = "file", required = false) MultipartFile file) throws IOException{
+		ObjectMapper objectmapper = new ObjectMapper();
+		FeedRequest request = new FeedRequest();
+		try {
+			request = objectmapper.readValue(requestStr, FeedRequest.class);
+		} catch (JsonProcessingException e) {
+			LOGGER.error("Error mapping json String to FeedRequest while adding");
+		}
 		FeedResponse created = feedServiceImpl.createFeed(request, file);
 		SuccessResponse resp = SuccessResponse.builder().statusCode(201).status(HttpStatus.CREATED)
 				.message("Feed created successfully").data(created).build();

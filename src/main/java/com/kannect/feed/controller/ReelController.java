@@ -3,6 +3,8 @@ package com.kannect.feed.controller;
 import java.io.IOException;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kannect.feed.dto.request.ReactionRequest;
 import com.kannect.feed.dto.request.ReelRequest;
 import com.kannect.feed.dto.response.ReelResponse;
@@ -35,93 +39,74 @@ import lombok.RequiredArgsConstructor;
 @CrossOrigin(origins = "*")
 class ReelController implements IReelController {
 
-    private final ReelServiceImpl reelService;
+	private final ReelServiceImpl reelService;
+	public static final Logger LOGGER = LoggerFactory.getLogger(ReelController.class);
 
-    @Override
-    @GetMapping
-    @PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
-    public ResponseEntity<SuccessResponse> getAllReels() {
-        List<ReelResponse> reels = reelService.getAllReels();
-        SuccessResponse resp = SuccessResponse.builder()
-            .statusCode(200)
-            .status(HttpStatus.OK)
-            .message("All reels fetched successfully")
-            .data(reels)
-            .build();
-        return ResponseEntity.ok(resp);
-    }
+	@Override
+	@GetMapping
+	@PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
+	public ResponseEntity<SuccessResponse> getAllReels() {
+		List<ReelResponse> reels = reelService.getAllReels();
+		SuccessResponse resp = SuccessResponse.builder().statusCode(200).status(HttpStatus.OK)
+				.message("All reels fetched successfully").data(reels).build();
+		return ResponseEntity.ok(resp);
+	}
 
-    @Override
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
-    public ResponseEntity<SuccessResponse> getReelById(@PathVariable Long id) {
-        ReelResponse reel = reelService.getReel(id);
-        SuccessResponse resp = SuccessResponse.builder()
-            .statusCode(200)
-            .status(HttpStatus.OK)
-            .message("Reel fetched successfully")
-            .data(reel)
-            .build();
-        return ResponseEntity.ok(resp);
-    }
+	@Override
+	@GetMapping("/{id}")
+	@PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
+	public ResponseEntity<SuccessResponse> getReelById(@PathVariable Long id) {
+		ReelResponse reel = reelService.getReel(id);
+		SuccessResponse resp = SuccessResponse.builder().statusCode(200).status(HttpStatus.OK)
+				.message("Reel fetched successfully").data(reel).build();
+		return ResponseEntity.ok(resp);
+	}
 
-    @Override
-    @PostMapping
-    @PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
-    public ResponseEntity<SuccessResponse> createReel(
-            @RequestPart("reel") ReelRequest request,
-            @RequestPart("file") MultipartFile videoFile) throws IOException {
-        ReelResponse created = reelService.createReel(request, videoFile);
-        SuccessResponse resp = SuccessResponse.builder()
-            .statusCode(201)
-            .status(HttpStatus.CREATED)
-            .message("Reel created successfully")
-            .data(created)
-            .build();
-        return new ResponseEntity<>(resp, HttpStatus.CREATED);
-    }
+	@Override
+	@PostMapping
+	@PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
+	public ResponseEntity<SuccessResponse> createReel(@RequestPart("reel")  String requestStr,
+			@RequestPart("file") MultipartFile videoFile) throws IOException {
+		ObjectMapper objectmapper = new ObjectMapper();
+		ReelRequest request = new ReelRequest();
+		try {
+			request = objectmapper.readValue(requestStr, ReelRequest.class);
+		} catch (JsonProcessingException e) {
+			LOGGER.error("Error mapping json String to FeedRequest while adding");
+		}
+		ReelResponse created = reelService.createReel(request, videoFile);
+		SuccessResponse resp = SuccessResponse.builder().statusCode(201).status(HttpStatus.CREATED)
+				.message("Reel created successfully").data(created).build();
+		return new ResponseEntity<>(resp, HttpStatus.CREATED);
+	}
 
-    @Override
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
-    public ResponseEntity<SuccessResponse> updateReel(
-            @PathVariable Long id,
-            @RequestBody ReelRequest request) {
-        ReelResponse updated = reelService.updateReel(id, request);
-        SuccessResponse resp = SuccessResponse.builder()
-            .statusCode(200)
-            .status(HttpStatus.OK)
-            .message("Reel updated successfully")
-            .data(updated)
-            .build();
-        return ResponseEntity.ok(resp);
-    }
+	@Override
+	@PutMapping("/{id}")
+	@PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
+	public ResponseEntity<SuccessResponse> updateReel(@PathVariable Long id, @RequestBody ReelRequest request) {
+		ReelResponse updated = reelService.updateReel(id, request);
+		SuccessResponse resp = SuccessResponse.builder().statusCode(200).status(HttpStatus.OK)
+				.message("Reel updated successfully").data(updated).build();
+		return ResponseEntity.ok(resp);
+	}
 
-    @Override
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
-    public ResponseEntity<SuccessResponse> deleteReel(@PathVariable Long id) {
-        reelService.deleteReel(id);
-        SuccessResponse resp = SuccessResponse.builder()
-            .statusCode(200)
-            .status(HttpStatus.OK)
-            .message("Reel deleted successfully")
-            .build();
-        return ResponseEntity.ok(resp);
-    }
+	@Override
+	@DeleteMapping("/{id}")
+	@PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
+	public ResponseEntity<SuccessResponse> deleteReel(@PathVariable Long id) {
+		reelService.deleteReel(id);
+		SuccessResponse resp = SuccessResponse.builder().statusCode(200).status(HttpStatus.OK)
+				.message("Reel deleted successfully").build();
+		return ResponseEntity.ok(resp);
+	}
 
-    @Override
-    @PostMapping("/{id}/reaction")
-    @PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
-    public ResponseEntity<SuccessResponse> reactToReel(
-            @PathVariable Long id,
-            @RequestBody ReactionRequest reaction) {
-        reelService.reactToReel(id, reaction.getUserId(), reaction.isLiked());
-        SuccessResponse resp = SuccessResponse.builder()
-            .statusCode(200)
-            .status(HttpStatus.OK)
-            .message("Reel reaction recorded successfully")
-            .build();
-        return ResponseEntity.ok(resp);
-    }
+	@Override
+	@PostMapping("/{id}/reaction")
+	@PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
+	public ResponseEntity<SuccessResponse> reactToReel(@PathVariable Long id, @RequestBody ReactionRequest reaction) {
+		reelService.reactToReel(id, reaction.getUserId(), reaction.isLiked());
+		SuccessResponse resp = SuccessResponse.builder().statusCode(200).status(HttpStatus.OK)
+				.message("Reel reaction recorded successfully").build();
+		return ResponseEntity.ok(resp);
+	}
 }

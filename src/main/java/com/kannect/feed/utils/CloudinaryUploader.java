@@ -28,14 +28,19 @@ public class CloudinaryUploader {
     }
 
     public String uploadFile(MultipartFile file, String fileName) throws IOException {
+        String contentType = file.getContentType();
+        String resourceType = "auto"; // Let Cloudinary auto-detect
+
         Map uploadResult = cloudinary.uploader().upload(
             file.getBytes(),
             ObjectUtils.asMap(
-                "public_id", fileName,  // Sets custom file name (without extension)
-                "overwrite", true       // Overwrite if file with same name exists
+                "resource_type", resourceType,
+                "public_id", fileName,
+                "overwrite", true
             )
         );
-        return uploadResult.get("secure_url").toString(); // Returns the public URL
+        return uploadResult.get("secure_url").toString();
     }
+
 
 }

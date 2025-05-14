@@ -43,7 +43,7 @@ public interface IReelController {
         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<SuccessResponse> createReel(
-        @Parameter(description = "Reel data") ReelRequest request,
+        @Parameter(description = "Reel data") String request,
         @Parameter(description = "Reel video file") MultipartFile file
     ) throws Exception;
 

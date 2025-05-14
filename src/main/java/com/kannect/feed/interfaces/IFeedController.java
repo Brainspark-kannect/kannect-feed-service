@@ -50,7 +50,7 @@ public interface IFeedController {
         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<SuccessResponse> createFeed(
-        @Parameter(description = "Feed data") FeedRequest request,
+        @Parameter(description = "Feed data") String request,
         @Parameter(description = "Feed media file") MultipartFile file
     ) throws Exception;
 
