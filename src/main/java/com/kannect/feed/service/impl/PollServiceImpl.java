@@ -1,5 +1,6 @@
 package com.kannect.feed.service.impl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class PollServiceImpl {
     public PollResponse createPoll(PollCreateRequest req) {
         Poll poll = new Poll();
         poll.setQuestion(req.getQuestion());
+        poll.setCreatedAt(Instant.now());
         poll = pollRepo.save(poll);
 
         // Save options
@@ -52,6 +54,7 @@ public class PollServiceImpl {
         PollVote vote = new PollVote();
         vote.setOption(option);
         vote.setVoterId(req.getVoterId());
+        vote.setVotedAt(Instant.now());
         voteRepo.save(vote);
     }
 

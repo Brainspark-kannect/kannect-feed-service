@@ -1,6 +1,7 @@
 package com.kannect.feed.interfaces;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.kannect.feed.dto.request.PollCreateRequest;
 import com.kannect.feed.dto.request.PollVoteRequest;
@@ -25,7 +26,7 @@ public interface IPollController {
         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<SuccessResponse> createPoll(
-        @Parameter(description = "Poll data") PollCreateRequest request
+    	@RequestBody @Parameter(description = "Poll data") PollCreateRequest request
     );
 
     @Operation(summary = "Vote in poll", description = "Cast a vote for a poll option")
@@ -36,7 +37,7 @@ public interface IPollController {
     })
     ResponseEntity<SuccessResponse> vote(
         @Parameter(description = "Poll ID") Long pollId,
-        @Parameter(description = "Vote data") PollVoteRequest request
+        @RequestBody @Parameter(description = "Vote data") PollVoteRequest request
     );
 
     @Operation(summary = "Get poll results", description = "Retrieve poll question and results")
