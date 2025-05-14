@@ -1,6 +1,7 @@
 package com.kannect.feed.service.impl;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,6 +30,8 @@ public class ReelServiceImpl {
         Reel reel = new Reel();
         reel.setCaption(req.getCaption());
         reel.setUserId(req.getUserId());
+        reel.setCreatedAt(Instant.now());
+        reel.setUpdatedAt(Instant.now());
         reel = reelRepo.save(reel);
 
         // Upload video to GCP and set URL
@@ -58,6 +61,7 @@ public class ReelServiceImpl {
     public ReelResponse updateReel(Long id, ReelRequest req) {
         Reel reel = reelRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Reel not found"));
         reel.setCaption(req.getCaption());
+        reel.setUpdatedAt(Instant.now());
         reel = reelRepo.save(reel);
         return new ReelResponse(reel.getId(), reel.getCaption(), reel.getUserId(), reel.getVideoUrl(), reel.getCreatedAt(), reel.getUpdatedAt());
     }
@@ -75,12 +79,14 @@ public class ReelServiceImpl {
         if (existing.isPresent()) {
             ReelLike reaction = existing.get();
             reaction.setLiked(liked);
+            reaction.setReactedAt(Instant.now());
             reelLikeRepo.save(reaction);
         } else {
             ReelLike reaction = new ReelLike();
             reaction.setReel(reel);
             reaction.setUserId(userId);
             reaction.setLiked(liked);
+            reaction.setReactedAt(Instant.now());
             reelLikeRepo.save(reaction);
         }
     }
