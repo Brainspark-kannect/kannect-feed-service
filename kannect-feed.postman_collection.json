@@ -1,0 +1,395 @@
+{
+	"info": {
+		"_postman_id": "random-uuid",
+		"name": "Kannect Feed Service",
+		"description": "Collection for Kannect Feed Service API endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Feeds",
+			"item": [
+				{
+					"name": "Get All Feeds",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/feed/api/feeds",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "feeds"]
+						},
+						"description": "Retrieve all feed posts"
+					}
+				},
+				{
+					"name": "Get Feed by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/feed/api/feeds/:id",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "feeds", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Feed ID"
+								}
+							]
+						},
+						"description": "Retrieve a feed post by its ID"
+					}
+				},
+				{
+					"name": "Get Fun Friday Feeds",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/feed/api/feeds/funfriday",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "feeds", "funfriday"]
+						},
+						"description": "Retrieve feed posts tagged as Fun Friday"
+					}
+				},
+				{
+					"name": "Create Feed",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "feed",
+									"value": "{\n  \"title\": \"Sample Feed\",\n  \"content\": \"Feed content\"\n}",
+									"type": "text",
+									"description": "Feed data in JSON format"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"description": "Optional media file"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/feed/api/feeds",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "feeds"]
+						},
+						"description": "Create a new feed post with optional media"
+					}
+				},
+				{
+					"name": "Update Feed",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Feed\",\n  \"content\": \"Updated content\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/feed/api/feeds/:id",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "feeds", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Feed ID to update"
+								}
+							]
+						},
+						"description": "Update an existing feed post"
+					}
+				},
+				{
+					"name": "Delete Feed",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/feed/api/feeds/:id",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "feeds", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Feed ID to delete"
+								}
+							]
+						},
+						"description": "Delete a feed post by its ID"
+					}
+				}
+			]
+		},
+		{
+			"name": "Reels",
+			"item": [
+				{
+					"name": "Get All Reels",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/feed/api/reels",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "reels"]
+						},
+						"description": "Retrieve all reel posts"
+					}
+				},
+				{
+					"name": "Get Reel by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/feed/api/reels/:id",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "reels", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Reel ID"
+								}
+							]
+						},
+						"description": "Retrieve a reel post by its ID"
+					}
+				},
+				{
+					"name": "Create Reel",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "reel",
+									"value": "{\n  \"title\": \"Sample Reel\",\n  \"description\": \"Reel description\"\n}",
+									"type": "text",
+									"description": "Reel data in JSON format"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"description": "Video file for the reel"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/feed/api/reels",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "reels"]
+						},
+						"description": "Create a new reel post with media"
+					}
+				},
+				{
+					"name": "Update Reel",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Reel\",\n  \"description\": \"Updated description\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/feed/api/reels/:id",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "reels", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Reel ID to update"
+								}
+							]
+						},
+						"description": "Update an existing reel post"
+					}
+				},
+				{
+					"name": "Delete Reel",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/feed/api/reels/:id",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "reels", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Reel ID to delete"
+								}
+							]
+						},
+						"description": "Delete a reel post by its ID"
+					}
+				},
+				{
+					"name": "React to Reel",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"user123\",\n  \"liked\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/feed/api/reels/:id/reaction",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "reels", ":id", "reaction"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Reel ID to react to"
+								}
+							]
+						},
+						"description": "Like or dislike a reel post"
+					}
+				}
+			]
+		},
+		{
+			"name": "Polls",
+			"item": [
+				{
+					"name": "Get All Polls",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/feed/api/polls",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "polls"]
+						},
+						"description": "Retrieve all polls"
+					}
+				},
+				{
+					"name": "Get Poll by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/feed/api/polls/:id",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "polls", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Poll ID"
+								}
+							]
+						},
+						"description": "Retrieve poll question and results"
+					}
+				},
+				{
+					"name": "Create Poll",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"question\": \"Sample Poll Question\",\n  \"options\": [\"Option 1\", \"Option 2\", \"Option 3\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/feed/api/polls",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "polls"]
+						},
+						"description": "Create a new poll with options"
+					}
+				},
+				{
+					"name": "Vote in Poll",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"user123\",\n  \"optionId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/feed/api/polls/:id/vote",
+							"host": ["{{base_url}}"],
+							"path": ["feed", "api", "polls", ":id", "vote"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Poll ID"
+								}
+							]
+						},
+						"description": "Cast a vote for a poll option"
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "your_jwt_token_here",
+			"type": "string"
+		}
+	]
+} 
