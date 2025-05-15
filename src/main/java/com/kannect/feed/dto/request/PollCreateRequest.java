@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class PollCreateRequest {
     private String question;
     private List<String> options;
+    private Long createdBy;  // ID of the user creating the poll
 }

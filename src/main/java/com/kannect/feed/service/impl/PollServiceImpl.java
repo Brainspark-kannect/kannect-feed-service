@@ -15,19 +15,23 @@ import com.kannect.feed.dto.response.PollResponse;
 import com.kannect.feed.entity.Poll;
 import com.kannect.feed.entity.PollOption;
 import com.kannect.feed.entity.PollVote;
+import com.kannect.feed.exception.ResourceNotFoundException;
 import com.kannect.feed.repository.PollOptionRepository;
 import com.kannect.feed.repository.PollRepository;
 import com.kannect.feed.repository.PollVoteRepository;
+import com.kannect.user.auth.repository.UserRepository;
 
 @Service
 public class PollServiceImpl {
     @Autowired private PollRepository pollRepo;
     @Autowired private PollOptionRepository optionRepo;
     @Autowired private PollVoteRepository voteRepo;
+    @Autowired private UserRepository userRepo;
 
     public PollResponse createPoll(PollCreateRequest req) {
         Poll poll = new Poll();
         poll.setQuestion(req.getQuestion());
+        poll.setCreatedBy(req.getCreatedBy());
         poll.setCreatedAt(Instant.now());
         poll = pollRepo.save(poll);
 
@@ -38,20 +42,30 @@ public class PollServiceImpl {
             opt.setText(optText);
             opt.setPoll(poll);
             opt = optionRepo.save(opt);
-            optionResponses.add(new PollOptionResponse(opt.getId(), opt.getText(), 0));
+            optionResponses.add(new PollOptionResponse(opt.getId(), opt.getText(), 0, new ArrayList<>()));
         }
 
-        return new PollResponse(poll.getId(), poll.getQuestion(), optionResponses);
+        return PollResponse.builder()
+            .pollId(poll.getId())
+            .question(poll.getQuestion())
+            .createdBy(poll.getCreatedBy())
+            .creatorName(getUserName(poll.getCreatedBy()))
+            .createdAt(poll.getCreatedAt())
+            .options(optionResponses)
+            .votedByUsers(new ArrayList<>())
+            .build();
     }
 
     public void vote(Long pollId, PollVoteRequest req) {
         // Find option
         PollOption option = optionRepo.findById(req.getOptionId())
-            .orElseThrow(/*NotFound*/);
-        // Prevent duplicate vote for this option by this voter
+            .orElseThrow(() -> new ResourceNotFoundException("Poll option not found with id: " + req.getOptionId()));
+            
+        // Check if user has already voted
         if (voteRepo.existsByOptionAndVoterId(option, req.getVoterId())) {
             throw new IllegalStateException("User has already voted for this option");
         }
+        
         PollVote vote = new PollVote();
         vote.setOption(option);
         vote.setVoterId(req.getVoterId());
@@ -60,39 +74,60 @@ public class PollServiceImpl {
     }
 
     public PollResponse getPollWithResults(Long pollId) {
-        Poll poll = pollRepo.findById(pollId).orElseThrow(/*NotFound*/);
+        Poll poll = pollRepo.findById(pollId)
+            .orElseThrow(() -> new ResourceNotFoundException("Poll not found with id: " + pollId));
+            
         List<PollOptionResponse> optionResponses = new ArrayList<>();
         for (PollOption opt : poll.getOptions()) {
             long count = voteRepo.countByOption(opt);
-            optionResponses.add(new PollOptionResponse(opt.getId(), opt.getText(), count));
+            List<Long> voters = voteRepo.findVoterIdsByOption(opt);
+            optionResponses.add(new PollOptionResponse(opt.getId(), opt.getText(), count, voters));
         }
-        return new PollResponse(poll.getId(), poll.getQuestion(), optionResponses);
+        
+        // Get all voters for this poll
+        List<Long> allVoters = voteRepo.findVoterIdsByPollId(pollId);
+        
+        return PollResponse.builder()
+            .pollId(poll.getId())
+            .question(poll.getQuestion())
+            .createdBy(poll.getCreatedBy())
+            .creatorName(getUserName(poll.getCreatedBy()))
+            .createdAt(poll.getCreatedAt())
+            .options(optionResponses)
+            .votedByUsers(allVoters)
+            .build();
     }
-    
-    
-    public List<PollResponse> getAllPollsWithResults() {
-        // 1. Fetch all polls
-        List<Poll> polls = pollRepo.findAll();
 
-        // 2. Map each Poll to a PollResponse with counts
-        return polls.stream()
+    public List<PollResponse> getAllPolls() {
+        return pollRepo.findAll().stream()
             .map(poll -> {
                 List<PollOptionResponse> optionResponses = new ArrayList<>();
                 for (PollOption opt : poll.getOptions()) {
                     long count = voteRepo.countByOption(opt);
-                    optionResponses.add(new PollOptionResponse(
-                        opt.getId(),
-                        opt.getText(),
-                        count
-                    ));
+                    List<Long> voters = voteRepo.findVoterIdsByOption(opt);
+                    optionResponses.add(new PollOptionResponse(opt.getId(), opt.getText(), count, voters));
                 }
-                return new PollResponse(
-                    poll.getId(),
-                    poll.getQuestion(),
-                    optionResponses
-                );
+                
+                // Get all voters for this poll
+                List<Long> allVoters = voteRepo.findVoterIdsByPollId(poll.getId());
+                
+                return PollResponse.builder()
+                    .pollId(poll.getId())
+                    .question(poll.getQuestion())
+                    .createdBy(poll.getCreatedBy())
+                    .creatorName(getUserName(poll.getCreatedBy()))
+                    .createdAt(poll.getCreatedAt())
+                    .options(optionResponses)
+                    .votedByUsers(allVoters)
+                    .build();
             })
             .collect(Collectors.toList());
+    }
+
+    private String getUserName(Long userId) {
+        return userRepo.findById(userId)
+            .map(user -> user.getFirstName() + " " + user.getLastName())
+            .orElse("Unknown User");
     }
 }
 

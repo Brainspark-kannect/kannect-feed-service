@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PollVoteRequest {
     private Long optionId;
-    private String voterId;   // anonymous user identifier
+    private Long voterId;   // Changed from String to Long - user identifier
 }

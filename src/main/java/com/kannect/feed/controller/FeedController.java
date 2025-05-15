@@ -25,11 +25,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kannect.feed.dto.request.FeedRequest;
 import com.kannect.feed.dto.request.ReactionRequest;
+import com.kannect.feed.dto.response.ErrorResponse;
 import com.kannect.feed.dto.response.FeedResponse;
 import com.kannect.feed.dto.response.SuccessResponse;
 import com.kannect.feed.interfaces.IFeedController;
 import com.kannect.feed.service.impl.FeedServiceImpl;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -37,9 +39,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Validated
 @CrossOrigin(origins = "*")
-public class FeedController implements IFeedController{
+public class FeedController implements IFeedController {
 
 	private final FeedServiceImpl feedServiceImpl;
+	private final ObjectMapper objectMapper;
 	public static final Logger LOGGER = LoggerFactory.getLogger(FeedController.class);
 
 	@Override
@@ -76,18 +79,98 @@ public class FeedController implements IFeedController{
 	@PostMapping
 	@PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
 	public ResponseEntity<SuccessResponse> createFeed(@RequestPart("feed") String requestStr,
-			@RequestPart(value = "file", required = false) MultipartFile file) throws IOException{
-		ObjectMapper objectmapper = new ObjectMapper();
-		FeedRequest request = new FeedRequest();
+			@RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
 		try {
-			request = objectmapper.readValue(requestStr, FeedRequest.class);
+			// Deserialize and validate the request
+			FeedRequest request = objectMapper.readValue(requestStr, FeedRequest.class);
+			
+			// Validate the request manually since @Valid can't be used with @RequestPart String
+			if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+				LOGGER.error("Feed creation failed: title is required");
+				return new ResponseEntity<>(
+					SuccessResponse.builder()
+						.statusCode(400)
+						.status(HttpStatus.BAD_REQUEST)
+						.message("Title is required")
+						.build(),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+			
+			if (request.getContent() == null || request.getContent().trim().isEmpty()) {
+				LOGGER.error("Feed creation failed: content is required");
+				return new ResponseEntity<>(
+					SuccessResponse.builder()
+						.statusCode(400)
+						.status(HttpStatus.BAD_REQUEST)
+						.message("Content is required")
+						.build(),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+			
+			if (request.getType() == null || request.getType().trim().isEmpty()) {
+				LOGGER.error("Feed creation failed: type is required");
+				return new ResponseEntity<>(
+					SuccessResponse.builder()
+						.statusCode(400)
+						.status(HttpStatus.BAD_REQUEST)
+						.message("Type is required")
+						.build(),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+			
+			if (request.getCreatedBy() == null) {
+				LOGGER.error("Feed creation failed: createdBy is required");
+				return new ResponseEntity<>(
+					SuccessResponse.builder()
+						.statusCode(400)
+						.status(HttpStatus.BAD_REQUEST)
+						.message("Creator ID is required")
+						.build(),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			LOGGER.info("Creating feed with title: {}, type: {}, createdBy: {}", 
+					   request.getTitle(), request.getType(), request.getCreatedBy());
+			
+			FeedResponse created = feedServiceImpl.createFeed(request, file);
+			
+			LOGGER.info("Feed created successfully with ID: {}", created.getId());
+			
+			return new ResponseEntity<>(
+				SuccessResponse.builder()
+					.statusCode(201)
+					.status(HttpStatus.CREATED)
+					.message("Feed created successfully")
+					.data(created)
+					.build(),
+				HttpStatus.CREATED
+			);
+			
 		} catch (JsonProcessingException e) {
-			LOGGER.error("Error mapping json String to FeedRequest while adding");
+			LOGGER.error("Error parsing feed request JSON: {}", e.getMessage());
+			return new ResponseEntity<>(
+				SuccessResponse.builder()
+					.statusCode(400)
+					.status(HttpStatus.BAD_REQUEST)
+					.message("Invalid feed request format")
+					.build(),
+				HttpStatus.BAD_REQUEST
+			);
+		} catch (Exception e) {
+			LOGGER.error("Error creating feed: {}", e.getMessage());
+			return new ResponseEntity<>(
+				SuccessResponse.builder()
+					.statusCode(500)
+					.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.message("Error creating feed: " + e.getMessage())
+					.build(),
+				HttpStatus.INTERNAL_SERVER_ERROR
+			);
 		}
-		FeedResponse created = feedServiceImpl.createFeed(request, file);
-		SuccessResponse resp = SuccessResponse.builder().statusCode(201).status(HttpStatus.CREATED)
-				.message("Feed created successfully").data(created).build();
-		return new ResponseEntity<>(resp, HttpStatus.CREATED);
 	}
 
 	@Override

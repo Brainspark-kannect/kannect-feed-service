@@ -30,7 +30,7 @@ public class PollVote {
     @JoinColumn(name = "poll_option_id", nullable = false)
     private PollOption option;
 
-    private String voterId;     // anonymous identifier to prevent double-voting
+    private Long voterId;     // Changed from String to Long
 
     @CreatedDate
     private Instant votedAt;

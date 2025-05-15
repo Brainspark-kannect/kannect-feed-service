@@ -30,6 +30,7 @@ public class Poll {
     private Long id;
 
     private String question;
+    private Long createdBy;  // ID of the user who created the poll
 
     @CreatedDate
     private Instant createdAt;

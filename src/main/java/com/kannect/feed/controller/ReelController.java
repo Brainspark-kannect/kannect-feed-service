@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +30,6 @@ import com.kannect.feed.dto.response.SuccessResponse;
 import com.kannect.feed.interfaces.IReelController;
 import com.kannect.feed.service.impl.ReelServiceImpl;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -103,8 +103,15 @@ class ReelController implements IReelController {
 	@Override
 	@PostMapping("/{id}/reaction")
 	@PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
-	public ResponseEntity<SuccessResponse> reactToReel(@PathVariable Long id, @RequestBody ReactionRequest reaction) {
-		reelService.reactToReel(id, reaction.getUserId(), reaction.isLiked());
+	public ResponseEntity<SuccessResponse> reactToReel(
+			@PathVariable Long id, 
+			@org.springframework.web.bind.annotation.RequestBody ReactionRequest reaction) {
+		LOGGER.info("Received reel reaction request: reelId={}, request={}", id, reaction);
+		if (reaction.getUserId() == null) {
+			LOGGER.error("userId is null in reaction request");
+			throw new IllegalArgumentException("userId is required");
+		}
+		reelService.reactToReel(id, reaction);
 		SuccessResponse resp = SuccessResponse.builder().statusCode(200).status(HttpStatus.OK)
 				.message("Reel reaction recorded successfully").build();
 		return ResponseEntity.ok(resp);

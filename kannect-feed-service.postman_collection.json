@@ -1,0 +1,307 @@
+{
+	"info": {
+		"_postman_id": "b5a2e3c4-d6f7-4e8a-9b1c-123456789abc",
+		"name": "Kannect Feed Service",
+		"description": "API collection for Kannect Feed Service - managing feeds, reels, and polls",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Feed Management",
+			"item": [
+				{
+					"name": "Create Feed",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Sample Feed\",\n    \"content\": \"This is a sample feed content\",\n    \"type\": \"Birthday\",\n    \"isFunFriday\": false,\n    \"createdBy\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/feeds",
+							"host": ["{{base_url}}"],
+							"path": ["api", "feeds"]
+						},
+						"description": "Create a new feed post"
+					}
+				},
+				{
+					"name": "Get All Feeds",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/feeds",
+							"host": ["{{base_url}}"],
+							"path": ["api", "feeds"]
+						},
+						"description": "Retrieve all feeds"
+					}
+				},
+				{
+					"name": "Get Feed by ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/feeds/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "feeds", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Retrieve a specific feed by ID"
+					}
+				},
+				{
+					"name": "Like/Dislike Feed",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": 1,\n    \"liked\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/feeds/:id/react",
+							"host": ["{{base_url}}"],
+							"path": ["api", "feeds", ":id", "react"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Like or dislike a feed"
+					}
+				},
+				{
+					"name": "Upload Feed Media",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/feeds/:id/media",
+							"host": ["{{base_url}}"],
+							"path": ["api", "feeds", ":id", "media"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Upload media for a feed"
+					}
+				}
+			]
+		},
+		{
+			"name": "Reel Management",
+			"item": [
+				{
+					"name": "Create Reel",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "reel",
+									"value": "{\"caption\":\"Sample Reel\",\"userId\":1}",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reels",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reels"]
+						},
+						"description": "Create a new reel with video"
+					}
+				},
+				{
+					"name": "Get All Reels",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/reels",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reels"]
+						},
+						"description": "Retrieve all reels"
+					}
+				},
+				{
+					"name": "Get Reel by ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/reels/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reels", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Retrieve a specific reel by ID"
+					}
+				},
+				{
+					"name": "Like/Dislike Reel",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": 1,\n    \"liked\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reels/:id/reaction",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reels", ":id", "reaction"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Like or dislike a reel"
+					}
+				}
+			]
+		},
+		{
+			"name": "Poll Management",
+			"item": [
+				{
+					"name": "Create Poll",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"What's your favorite programming language?\",\n    \"options\": [\"Java\", \"Python\", \"JavaScript\", \"Go\"],\n    \"createdBy\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/polls",
+							"host": ["{{base_url}}"],
+							"path": ["api", "polls"]
+						},
+						"description": "Create a new poll"
+					}
+				},
+				{
+					"name": "Get All Polls",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/polls",
+							"host": ["{{base_url}}"],
+							"path": ["api", "polls"]
+						},
+						"description": "Retrieve all polls"
+					}
+				},
+				{
+					"name": "Get Poll by ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/polls/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "polls", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Retrieve a specific poll by ID"
+					}
+				},
+				{
+					"name": "Vote in Poll",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"optionId\": 1,\n    \"voterId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/polls/:id/vote",
+							"host": ["{{base_url}}"],
+							"path": ["api", "polls", ":id", "vote"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Vote in a poll"
+					}
+				}
+			]
+		}
+	]
+} 

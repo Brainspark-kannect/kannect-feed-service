@@ -23,6 +23,7 @@ import com.kannect.feed.repository.FeedLikeRepository;
 import com.kannect.feed.repository.FeedMediaRepository;
 import com.kannect.feed.repository.FeedRepository;
 import com.kannect.feed.utils.CloudinaryUploader;
+import com.kannect.user.auth.repository.UserRepository;
 
 @Service
 public class FeedServiceImpl {
@@ -30,6 +31,7 @@ public class FeedServiceImpl {
     @Autowired private FeedMediaRepository mediaRepo;
     @Autowired private FeedLikeRepository feedLikeRepo;
     @Autowired private CloudinaryUploader cloudinaryUploader;
+    @Autowired private UserRepository userRepo;
 
     public FeedResponse createFeed(FeedRequest req, MultipartFile file) throws IOException {
         // 1. Save Feed entity
@@ -38,15 +40,15 @@ public class FeedServiceImpl {
         feed.setContent(req.getContent());
         feed.setType(req.getType());
         feed.setFunFriday(req.isFunFriday());
+        feed.setCreatedBy(req.getCreatedBy());
         feed.setCreatedAt(Instant.now());
         feed.setUpdatedAt(Instant.now());
         feed = feedRepo.save(feed);
 
         // 2. If file provided, upload to GCP and save FeedMedia
         if (file != null && !file.isEmpty()) {
-            // Use Google Cloud Storage client to upload file
-        	String fileName = "feed-media/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
-            String url = cloudinaryUploader.uploadFile(file,fileName); // returns public URL or path
+            String fileName = "feed-media/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
+            String url = cloudinaryUploader.uploadFile(file,fileName);
             FeedMedia media = new FeedMedia();
             media.setFeed(feed);
             media.setGcpUrl(url);
@@ -54,23 +56,7 @@ public class FeedServiceImpl {
             feed.setMedia(media);
         }
 
-        // 3. Build and return response DTO
-        long likes    = feedLikeRepo.countByFeedIdAndLikedTrue(feed.getId());
-        long dislikes = feedLikeRepo.countByFeedIdAndLikedFalse(feed.getId());
-
-        return new FeedResponse(
-            feed.getId(),
-            feed.getTitle(),
-            feed.getContent(),
-            feed.getType(),
-            feed.isFunFriday(),
-            feed.getMedia() != null ? feed.getMedia().getGcpUrl() : null,
-            feed.getCreatedAt(),
-            feed.getUpdatedAt(),
-            likes,               // new field
-            dislikes             // new field
-        );
-
+        return toDto(feed);
     }
 
     public FeedResponse getFeedById(Long id) {
@@ -133,8 +119,10 @@ public class FeedServiceImpl {
             : null;
 
         // Fetch like/dislike counts
-        long likes    = feedLikeRepo.countByFeedIdAndLikedTrue(feed.getId());
+        long likes = feedLikeRepo.countByFeedIdAndLikedTrue(feed.getId());
         long dislikes = feedLikeRepo.countByFeedIdAndLikedFalse(feed.getId());
+        List<Long> likedByUsers = feedLikeRepo.findUserIdsByFeedIdAndLikedTrue(feed.getId());
+        List<Long> dislikedByUsers = feedLikeRepo.findUserIdsByFeedIdAndLikedFalse(feed.getId());
 
         return new FeedResponse(
             feed.getId(),
@@ -143,11 +131,21 @@ public class FeedServiceImpl {
             feed.getType(),
             feed.isFunFriday(),
             mediaUrl,
+            feed.getCreatedBy(),
+            getUserName(feed.getCreatedBy()),
             feed.getCreatedAt(),
             feed.getUpdatedAt(),
             likes,
-            dislikes
+            dislikes,
+            likedByUsers,
+            dislikedByUsers
         );
+    }
+
+    private String getUserName(Long userId) {
+        return userRepo.findById(userId)
+            .map(user -> user.getFirstName() + " " + user.getLastName())
+            .orElse("Unknown User");
     }
 }
 

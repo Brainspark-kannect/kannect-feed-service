@@ -89,7 +89,7 @@ CREATE INDEX IF NOT EXISTS idx_poll_option_poll_id ON poll_option(poll_id);
 CREATE TABLE IF NOT EXISTS poll_vote (
     id             BIGSERIAL PRIMARY KEY,
     poll_option_id BIGINT     NOT NULL REFERENCES poll_option(id) ON DELETE CASCADE,
-    voter_id       VARCHAR(255) NOT NULL,
+    voter_id       BIGINT     NOT NULL,
     voted_at       TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     CONSTRAINT uq_vote_option_voter UNIQUE (poll_option_id, voter_id)
 );

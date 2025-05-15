@@ -77,12 +77,12 @@ class PollController implements IPollController {
     @GetMapping
     @PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
     public ResponseEntity<SuccessResponse> getAllPolls() {
-    	List<PollResponse> poll = pollService.getAllPollsWithResults();
+        List<PollResponse> polls = pollService.getAllPolls();
         SuccessResponse resp = SuccessResponse.builder()
             .statusCode(200)
             .status(HttpStatus.OK)
             .message("All polls fetched successfully")
-            .data(poll)
+            .data(polls)
             .build();
         return ResponseEntity.ok(resp);
     }

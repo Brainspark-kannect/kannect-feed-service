@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: classpath:/db/changelog/ddl/001-kannect-feed-service-ddl.sql
+  - include:
+      file: classpath:/db/changelog/ddl/002-add-user-fields.sql
